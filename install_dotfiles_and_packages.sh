@@ -42,8 +42,8 @@ pacman -Syu --noconfirm || print_error "Failed to update the system."
 if ! command -v yay &> /dev/null; then
     print_message "Installing Yay (AUR helper)..."
     pacman -S --needed --noconfirm git base-devel || print_error "Failed to install essential tools."
-    git clone https://aur.archlinux.org/yay.git /tmp/yay || print_error "Failed to clone Yay repository."
-    cd /tmp/yay || print_error "Failed to navigate to Yay directory."
+    git clone https://aur.archlinux.org/yay.git 
+    
     makepkg -si --noconfirm || print_error "Failed to install Yay."
     cd - || print_error "Failed to return to original directory."
 else
