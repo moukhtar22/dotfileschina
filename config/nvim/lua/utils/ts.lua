@@ -76,13 +76,23 @@ function M.get_node(opts)
   return vim.treesitter.get_node(opts)
 end
 
+---@class ts_find_node_opts_t : vim.treesitter.get_node.Opts
+---@field depth? integer
+
 ---Returns whether cursor is in a specific type of treesitter node
 ---@param types string|string[]|fun(types: string|string[]): boolean type of node, or function to check node type
----@param opts vim.treesitter.get_node.Opts?
----@return boolean
-function M.in_node(types, opts)
-  if not M.is_active(opts and opts.bufnr) then
-    return false
+---@param opts ts_find_node_opts_t?
+---@return TSNode?
+function M.find_node(types, opts)
+  local buf = opts and opts.bufnr
+
+  if not M.is_active(buf) then
+    return
+  end
+
+  local parser = vim.treesitter.get_parser(buf)
+  if not parser then
+    return
   end
 
   ---Check if given node type matches any of the types given in `types`
@@ -100,16 +110,34 @@ function M.in_node(types, opts)
       end)
     end
 
-  local node = M.get_node(opts)
-  while node do
-    local nt = node:type() -- current node type
-    if check_type_match(nt) then
-      return true
+  ---@return TSNode?
+  local function reverse_traverse()
+    local node = M.get_node(opts)
+    local depth = opts and opts.depth or math.huge
+    while node and depth > 0 do
+      local nt = node:type() -- current node type
+      if check_type_match(nt) then
+        return node
+      end
+      node = node:parent()
+      depth = depth - 1
     end
-    node = node:parent()
   end
 
-  return false
+  local node = reverse_traverse()
+  if node or parser:is_valid() then
+    return node
+  end
+
+  -- If the node wasn't found, re-parse the current tree and try again
+  --
+  -- Note: In the previous lookup, we traverse the original tree regardless
+  -- of whether it is valid or not, because re-parsing an edited region can
+  -- introduce `ERROR` nodes, potentially preventing node lookup even if the
+  -- cursor is within the node boundaries
+  local lnum = vim.fn.line('.')
+  parser:parse({ lnum - 1, lnum })
+  return reverse_traverse()
 end
 
 ---Get language at given buffer position, useful in files with injected syntax

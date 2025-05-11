@@ -4,6 +4,7 @@ local folder = ''
 return {
   'CRAG666/code_runner.nvim',
   -- name = "code_runner",
+  cmd = 'RunCode',
   dev = true,
   keys = {
     {
@@ -22,7 +23,22 @@ return {
     filetype = {
       v = 'v run',
       tex = function(...)
-        vim.cmd('silent! w')
+        require('code_runner.hooks.ui').select({
+          Project = function()
+            require('code_runner.hooks.tectonic').build(
+              preview_cmd,
+              { '--keep-intermediates', '--keep-logs' }
+            )
+          end,
+          Single = function()
+            require('code_runner.hooks.preview_pdf').run({
+              command = 'tectonic',
+              args = { '$fileName', "-o", "/tmp" },
+              preview_cmd = preview_cmd,
+              overwrite_output = '/tmp',
+            })
+          end,
+        })
       end,
       quarto = {
         'cd $dir &&',
@@ -82,23 +98,35 @@ return {
           )
         end)
       end,
-      cpp = {
-        'cd $dir &&',
-        'g++ $fileName',
-        '-o /tmp/$fileNameWithoutExt &&',
-        '/tmp/$fileNameWithoutExt',
-      },
+      -- cpp = {
+      --   'cd $dir &&',
+      --   'g++ $fileName',
+      --   '-o /tmp/$fileNameWithoutExt &&',
+      --   '/tmp/$fileNameWithoutExt',
+      -- },
+      cpp = function(...)
+        cpp_base = {
+          [[cd '$dir' &&]],
+          'g++ $fileName -o',
+          '/tmp/$fileNameWithoutExt',
+        }
+        local cpp_exec = {
+          '&& /tmp/$fileNameWithoutExt &&',
+          'rm /tmp/$fileNameWithoutExt',
+        }
+        vim.ui.input({ prompt = 'Add more args:' }, function(input)
+          cpp_base[4] = input
+          vim.print(vim.tbl_extend('force', cpp_base, cpp_exec))
+          require('code_runner.commands').run_from_fn(
+            vim.list_extend(cpp_base, cpp_exec)
+          )
+        end)
+      end,
       python = "python -u '$dir/$fileName'",
       sh = 'bash',
       typescript = 'deno run',
       typescriptreact = 'yarn dev$end',
       rust = 'cd $dir && rustc $fileName && $dir$fileNameWithoutExt',
-      dart = 'dart',
-      cs = function(...)
-        local root_dir =
-          require('null-ls.utils').root_pattern('*.csproj')(vim.loop.cwd())
-        return 'cd ' .. root_dir .. ' && dotnet run$end'
-      end,
     },
     project_path = vim.fn.expand('~/.config/nvim/project_manager.json'),
   },

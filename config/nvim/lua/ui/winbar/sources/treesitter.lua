@@ -5,15 +5,18 @@ local utils = require('ui.winbar.utils')
 ---Get short name of treesitter symbols in buffer buf
 ---@param node TSNode
 ---@param buf integer buffer handler
+---@return string name
 local function get_node_short_name(node, buf)
-  return vim
-    .trim(
-      vim.fn.matchstr(
-        vim.treesitter.get_node_text(node, buf):gsub('\n', ' '),
-        configs.opts.sources.treesitter.name_regex
+  return (
+    vim
+      .trim(
+        vim.fn.matchstr(
+          vim.treesitter.get_node_text(node, buf):gsub('\n', ' '),
+          configs.opts.sources.treesitter.name_regex
+        )
       )
-    )
-    :gsub('%s+', ' ')
+      :gsub('%s+', ' ')
+  )
 end
 
 ---Get valid treesitter node type name
@@ -163,6 +166,7 @@ local function get_symbols(buf, win, cursor)
     node = node:parent()
   end
 
+  utils.bar.set_min_widths(symbols, configs.opts.sources.treesitter.min_widths)
   return symbols
 end
 

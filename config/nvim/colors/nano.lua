@@ -3,7 +3,7 @@
 -- Author:       Bekaboo <kankefengjing@gmail.com>
 -- Maintainer:   Bekaboo <kankefengjing@gmail.com>
 -- License:      GPL-3.0
--- Last Updated: Fri Feb 14 01:50:04 PM EST 2025
+-- Last Updated: Tue 06 May 2025 10:06:31 AM PDT
 
 -- Clear hlgroups and set colors_name {{{
 vim.cmd.hi('clear')
@@ -173,8 +173,8 @@ local hlgroups = {
   WarningMsg = { fg = c_popout },
   Whitespace = { link = 'NonText' },
   WildMenu = { link = 'PmenuSel' },
-  WinBar = { fg = c_foreground },
-  WinBarNC = { fg = c_faded },
+  WinBar = { fg = c_foreground, bg = c_highlight },
+  WinBarNC = { fg = c_faded, bg = c_highlight },
   WinSeparator = { link = 'VertSplit' },
   lCursor = { link = 'Cursor' },
   -- }}}2
@@ -189,7 +189,7 @@ local hlgroups = {
   Boolean = { link = 'Constant' },
   Array = { fg = c_critical },
   Float = { link = 'Number' },
-  Identifier = { fg = c_foreground },
+  Identifier = {},
   Builtin = { fg = c_foreground },
   Field = { link = 'None' },
   Enum = { fg = c_faded },
@@ -607,7 +607,7 @@ local hlgroups = {
   texSymbol = { fg = c_critical },
   texTitleArg = { link = 'Title' },
   texVerbZone = { fg = c_foreground },
-  texZone = { fg = c_subtle },
+  texZone = { fg = c_popout },
   texMathArg = { fg = c_foreground },
   texMathCmd = { link = 'texCmd' },
   texMathSub = { fg = c_foreground },

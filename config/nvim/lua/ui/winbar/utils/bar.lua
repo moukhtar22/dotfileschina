@@ -105,7 +105,19 @@ end
 function M.attach(buf, win)
   local configs = require('ui.winbar.configs')
   if configs.eval(configs.opts.bar.enable, buf, win) then
-    vim.wo[win].winbar = '%{%v:lua._winbar()%}'
+    vim.wo[win][0].winbar = '%{%v:lua._winbar()%}'
+  end
+end
+
+---Set min widths for dropbar symbols
+---@param symbols winbar_symbol_t[]
+---@param min_widths integer[]
+function M.set_min_widths(symbols, min_widths)
+  for i, w in ipairs(min_widths) do
+    if i > #symbols then
+      break
+    end
+    symbols[#symbols - i + 1].min_width = w
   end
 end
 

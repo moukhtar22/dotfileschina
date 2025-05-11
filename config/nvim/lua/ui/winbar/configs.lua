@@ -280,7 +280,6 @@ M.opts = {
     ---@type table<string, winbar_menu_win_config_opts_t>
     ---@see vim.api.nvim_open_win
     win_configs = {
-      border = 'none',
       style = 'minimal',
       relative = 'win',
       win = function(menu)
@@ -352,6 +351,7 @@ M.opts = {
       -- Types listed below must have corresponding icons
       -- in the `icons.kinds.symbols` table for the icon to be shown
       valid_types = {
+        'block_mapping_pair',
         'break_statement',
         'call',
         'case_statement',
@@ -367,12 +367,7 @@ M.opts = {
         'event',
         'for_statement',
         'function',
-        'h1_marker',
-        'h2_marker',
-        'h3_marker',
-        'h4_marker',
-        'h5_marker',
-        'h6_marker',
+        'goto_statement',
         'if_statement',
         'interface',
         'keyword',
@@ -386,8 +381,10 @@ M.opts = {
         'property',
         'reference',
         'repeat',
+        'return_statement',
         'rule_set',
         'scope',
+        'section',
         'specifier',
         'struct',
         'switch_statement',
@@ -411,6 +408,8 @@ M.opts = {
         -- 'array',
         -- 'list',
       },
+      ---@type integer[]
+      min_widths = {},
     },
     lsp = {
       max_depth = 12,
@@ -447,6 +446,8 @@ M.opts = {
         ttl_init = 60,
         interval = 1000, -- in ms
       },
+      ---@type integer[]
+      min_widths = {},
     },
     markdown = {
       max_depth = 6,
@@ -454,6 +455,8 @@ M.opts = {
         -- Number of lines to update when cursor moves out of the parsed range
         look_ahead = 200,
       },
+      ---@type integer[]
+      min_widths = {},
     },
   },
 }

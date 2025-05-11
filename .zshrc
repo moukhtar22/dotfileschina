@@ -146,16 +146,16 @@ zstyle ':fzf-tab:complete:-command-:*' fzf-preview \
    '(out=$(cht.sh "$word") 2>/dev/null && echo $out) || (out=$(MANWIDTH=$FZF_PREVIEW_COLUMNS man "$word") 2>/dev/null && echo $out) || (out=$(which "$word") && echo $out) || echo "${(P)word}"'
 zstyle ':fzf-tab:complete:*:*' fzf-preview '~/.scripts/preview $realpath'
 
+# export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+# zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+# source <(carapace _carapace)
+
 enable-fzf-tab
 
 # -< Evals >-
 eval "$(zoxide init zsh)"
 eval "$(atuin init zsh)"
 eval "$(starship init zsh)"
-
-# export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-# zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-# source <(carapace _carapace)
 
 # -< Aliases >-
 # HACK: Command alternatives
@@ -168,13 +168,15 @@ alias la="exa --icons -la"
 # alias grep='grep --color=auto'
 # alias cp='rsync --progress -avz'
 cd() { pushd $1 && ls; }
-alias tree="exa --icons --tree --level=2 --long --git"
+alias tree="exa --icons --tree --level=4 --long --git"
+alias v="nvim"
 alias vi="nvim"
 alias vim="nvim"
 alias zt="/bin/zathura --fork"
 alias lo="/bin/libreoffice"
 alias music="termusic"
 alias rm='rm -i'
+alias dus='du -h --max-depth=1 2>/dev/null | sort -hr'
 alias du1='du -h -d 1'
 alias rec="wl-screenrec --dri-device $MOZ_DRM_DEVICE -f $(date +'%s_grab.mp4')"
 alias neofetch="fastfetch -l ~/.config/fastfetch/thinkpad.txt --logo-color-1 white --logo-color-2 red --logo-color-3 '38;2;23;147;209'"

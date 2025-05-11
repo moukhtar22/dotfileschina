@@ -3,15 +3,15 @@ local M = {}
 local lsp_autostop_pending
 ---Automatically stop LSP servers that no longer attach to any buffers
 ---
----  Once `BufDelete` is triggered, wait for 60s before checking and
+---  Once `LspDetach` is triggered, wait for 60s before checking and
 ---  stopping servers, in this way the callback will be invoked once
 ---  every 60 seconds at most and can stop multiple clients at once
 ---  if possible, which is more efficient than checking and stopping
----  clients on every `BufDelete` events
+---  clients on every `LspDetach` events
 ---
 ---@return nil
 local function setup_lsp_stopdetached()
-  vim.api.nvim_create_autocmd('BufDelete', {
+  vim.api.nvim_create_autocmd('LspDetach', {
     group = vim.api.nvim_create_augroup('LspAutoStop', {}),
     desc = 'Automatically stop detached language servers.',
     callback = function()
@@ -62,7 +62,7 @@ local function setup_lsp_overrides()
 
       if #result == 1 then
         local enc = vim.lsp.get_client_by_id(ctx.client_id).offset_encoding
-        vim.lsp.util.jump_to_location(result[1], enc)
+        vim.lsp.util.show_document(result[1], enc, { focus = true })
         return
       end
 
@@ -101,7 +101,7 @@ local function setup_lsp_overrides()
       opts.wrap = false
     end
     local floating_bufnr, floating_winnr =
-      _open_floating_preview(contents, syntax, opts)
+        _open_floating_preview(contents, syntax, opts)
     vim.wo[floating_winnr].concealcursor = 'nc'
     return floating_bufnr, floating_winnr
   end
@@ -117,18 +117,20 @@ local function setup_lsp_overrides()
   end
 end
 
-local function setup_diagnostic()
-  -- Diagnostic configuration
+-- Diagnostic configuration
+local function setup_diagnostic_configs()
   local icons = utils.static.icons.diagnostics
   vim.diagnostic.config({
-    underline = false,
-    virtual_text = false,
-    -- virtual_text = { spacing = 4, prefix = "●" },
+    severity_sort = true,
+    jump = {
+      float = true,
+    },
+    -- underline = false,
     -- virtual_text = {
-    --   severity = {
-    --     min = vim.diagnostic.severity.ERROR,
-    --   },
+    --   spacing = 4,
+    --   prefix = vim.trim(utils.static.icons.AngleLeft),
     -- },
+    virtual_text = false,
     signs = {
       text = {
         [vim.diagnostic.severity.ERROR] = icons.DiagnosticSignError,
@@ -148,26 +150,103 @@ local function setup_diagnostic()
   })
 end
 
-function M.setup(server, on_attach)
-  if vim.lsp.inlay_hint.is_enabled() ~= true then
-    vim.lsp.inlay_hint.enable()
+---Setup diagnostic handlers overrides
+local function setup_diagnostic_overrides()
+  ---Filter out diagnostics that overlap with diagnostics from other sources
+  ---For each diagnostic, checks if there exists another diagnostic from a different
+  ---namespace that has the same start line and column
+  ---
+  ---If multiple diagnostics overlap, prefer the one with higher severity
+  ---
+  ---This helps reduce redundant diagnostics when multiple language servers
+  ---(usually a language server and a linter hooked to an lsp wrapper) report
+  ---the same issue for the same range
+  ---@param diags vim.Diagnostic[]
+  ---@return vim.Diagnostic[]
+  local function filter_overlapped(diags)
+    ---Diagnostics cache, indexed by buffer number and line number (0-indexed)
+    ---to avoid calling `vim.diagnostic.get()` for the same buffer and line
+    ---repeatedly
+    ---@type table<integer, table<integer, table<integer, vim.Diagnostic>>>
+    local diags_cache = vim.defaulttable(function(bufnr)
+      local ds = vim.defaulttable() -- mapping from lnum to diagnostics
+      -- Avoid using another layer of default table index by lnum using
+      -- `vim.diagnostic.get(bufnr, { lnum = lnum })` to get diagnostics
+      -- by line number since it requires traversing all diagnostics in
+      -- the buffer each time
+      for _, d in ipairs(vim.diagnostic.get(bufnr)) do
+        table.insert(ds[d.lnum], d)
+      end
+      return ds
+    end)
+
+    return vim
+        .iter(diags)
+        :filter(function(diag) ---@param diag diagnostic_t
+          ---@class diagnostic_t: vim.Diagnostic
+          ---@field _hidden boolean whether the diagnostic is shown as virtual text
+
+          diag._hidden = vim
+              .iter(diags_cache[diag.bufnr][diag.lnum])
+              :any(function(d) ---@param d diagnostic_t
+                return not d._hidden
+                    and d.namespace ~= diag.namespace
+                    and d.severity <= diag.severity
+                    and d.col == diag.col
+              end)
+
+          return not diag._hidden
+        end)
+        :totable()
   end
-  require('config.lsp.grammar').setup()
+
+  ---Truncates multi-line diagnostic messages to their first line
+  ---@param diags vim.Diagnostic[]
+  ---@return vim.Diagnostic[]
+  local function truncate_multiline(diags)
+    return vim
+        .iter(diags)
+        :map(function(d) ---@param d vim.Diagnostic
+          local first_line = vim.gsplit(d.message, '\n')()
+          if not first_line or first_line == d.message then
+            return d
+          end
+          return vim.tbl_extend('keep', {
+            message = first_line,
+          }, d)
+        end)
+        :totable()
+  end
+
+  vim.diagnostic.handlers.virtual_text.show = (function(cb)
+    ---@param ns integer
+    ---@param buf integer
+    ---@param diags vim.Diagnostic[]
+    ---@param opts vim.diagnostic.OptsResolved
+    return function(ns, buf, diags, opts)
+      return cb(ns, buf, truncate_multiline(filter_overlapped(diags)), opts)
+    end
+  end)(vim.diagnostic.handlers.virtual_text.show)
+end
+
+function M.setup()
   local lu = require('config.lsp.utils')
+  vim.lsp.config('*', {
+    capabilities = lu.capabilities(),
+    root_markers = { '.git' },
+  })
   lu.on_attach(function(client, bufnr)
+    -- if vim.lsp.inlay_hint.is_enabled() ~= true then
+    --   vim.lsp.inlay_hint.enable()
+    -- end
+    require('config.lsp.commands').setup()
     require('config.lsp.highlighter').on_attach(client, bufnr)
-    require('config.lsp.format').on_attach(client, bufnr)
     require('config.lsp.keymaps').on_attach(client, bufnr)
     setup_lsp_overrides()
     setup_lsp_stopdetached()
-    setup_diagnostic()
-    require('config.lsp.commands').setup()
-    if on_attach ~= nil then
-      on_attach(client, bufnr)
-    end
+    setup_diagnostic_overrides()
+    setup_diagnostic_configs()
   end)
-  server.capabilities = lu.capabilities()
-  utils.lsp.start(server)
 end
 
 return M
