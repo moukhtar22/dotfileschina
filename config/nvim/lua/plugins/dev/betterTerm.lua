@@ -12,6 +12,14 @@ return {
       desc = 'Open terminal',
     },
     {
+      mode = { 'n', 't' },
+      '<C-/>',
+      function()
+        require('betterTerm').open(1)
+      end,
+      desc = 'Open terminal',
+    },
+    {
       '<leader>tt',
       function()
         require('betterTerm').select()
@@ -28,8 +36,11 @@ return {
     },
   },
   opts = {
+    -- position = 'vertical',
+    -- size = 60,
     position = 'bot',
-    size = 15,
+    size = 25,
+    jump_tab_mapping = "<A-$tab>",
+    new_tab_icon = require('utils.static.icons').git.Added
   },
-  -- config = true,
 }

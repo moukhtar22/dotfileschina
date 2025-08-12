@@ -6,32 +6,16 @@ M.default_config = {
   root_markers = require('utils.fs').root_markers,
 }
 
----@class vim.lsp.ClientConfig: lsp_client_config_t
----@class lsp_client_config_t
----@field cmd? (string[]|fun(dispatchers: table):table)
----@field cmd_cwd? string
----@field cmd_env? (table)
----@field detached? boolean
----@field workspace_folders? (table)
----@field capabilities? lsp.ClientCapabilities
----@field handlers? table<string,function>
----@field settings? table
----@field commands? table
----@field init_options? table
----@field name? string
----@field get_language_id? fun(bufnr: integer, filetype: string): string
----@field offset_encoding? string
----@field on_error? fun(code: integer)
----@field before_init? function
----@field on_init? function
----@field on_exit? fun(code: integer, signal: integer, client_id: integer)
----@field on_attach? fun(client: vim.lsp.Client, bufnr: integer)
----@field trace? 'off'|'messages'|'verbose'|nil
----@field flags? table
----@field root_dir? string
----@field root_markers? string[]
+---@class (partial) lsp_config_t : vim.lsp.Config
 ---@field requires? string[] additional executables required to start the language server
 ---@field buf_support? boolean whether the language server works on buffers without corresponding files
+
+---@class (partial) lsp_client_config_t : vim.lsp.ClientConfig
+---@field requires? string[] additional executables required to start the language server
+---@field buf_support? boolean whether the language server works on buffers without corresponding files
+
+-- Avoid recursion after overriding
+local lsp_start = vim.lsp.start
 
 ---Wrapper of `vim.lsp.start()`, starts and attaches LSP client for
 ---the current buffer
@@ -39,7 +23,7 @@ M.default_config = {
 ---@param opts table?
 ---@return integer? client_id id of attached client or nil if failed
 function M.start(config, opts)
-  if vim.b.bigfile or vim.bo.bt == 'nofile' or vim.g.vscode then
+  if not config or vim.b.bigfile or vim.bo.bt == 'nofile' or vim.g.vscode then
     return
   end
 
@@ -68,6 +52,7 @@ function M.start(config, opts)
     -- For some special buffers like `fugitive:///xxx`, `vim.fs.root()`
     -- returns '.' as result, which is NOT a valid directory
     return dir ~= nil
+        and dir ~= ''
         and dir ~= '.'
         and vim.fn.isdirectory(dir) == 1
         -- Some language servers e.g. lua-language-server, refuse
@@ -78,18 +63,20 @@ function M.start(config, opts)
       or nil
   end
 
-  return vim.lsp.start(
+  local root_dir = validate(
+    require('utils.fs').root(
+      bufname,
+      vim.list_extend(
+        config.root_markers or {},
+        M.default_config.root_markers or {}
+      )
+    )
+  ) or validate(vim.fs.dirname(bufname)) or vim.fn.getcwd(0)
+
+  return lsp_start(
     vim.tbl_deep_extend('keep', config or {}, {
       name = name,
-      root_dir = validate(
-        vim.fs.root(
-          bufname,
-          vim.list_extend(
-            config.root_markers or {},
-            M.default_config.root_markers or {}
-          )
-        )
-      ),
+      root_dir = root_dir,
     }, M.default_config),
     opts
   )
@@ -153,6 +140,7 @@ function M.restart(client_or_id, opts)
           return
         end
         vim.api.nvim_buf_call(buf, function()
+          ---@cast config lsp_client_config_t
           local id = M.start(config)
           if id and opts and opts.on_restart then
             opts.on_restart(id)
@@ -179,45 +167,45 @@ function M.range_contains(range1, range2, strict)
   local end_char2 = range2['end'].character
   -- stylua: ignore start
   return (
-    start_line2 > start_line1
-    or (start_line2 == start_line1
-        and (
-          start_char2 > start_char1
-          or not strict and start_char2 == start_char1
+        start_line2 > start_line1
+        or (start_line2 == start_line1
+          and (
+            start_char2 > start_char1
+            or not strict and start_char2 == start_char1
+          )
         )
       )
-    )
-    and (
-      start_line2 < end_line1
-      or (
-        start_line2 == end_line1
+      and (
+        start_line2 < end_line1
+        or (
+          start_line2 == end_line1
           and (
             start_char2 < end_char1
             or not strict and start_char2 == end_char1
           )
         )
       )
-    and (
-      end_line2 > start_line1
-      or (
-        end_line2 == start_line1
+      and (
+        end_line2 > start_line1
+        or (
+          end_line2 == start_line1
           and (
             end_char2 > start_char1
             or not strict and end_char2 == start_char1
           )
         )
       )
-    and (
-      end_line2 < end_line1
-      or (
-        end_line2 == end_line1
+      and (
+        end_line2 < end_line1
+        or (
+          end_line2 == end_line1
           and (
             end_char2 < end_char1
             or not strict and end_char2 == end_char1
           )
         )
       )
-  -- stylua: ignore off
+  -- stylua: ignore end
 end
 
 ---Check if cursor is in range

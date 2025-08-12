@@ -79,6 +79,7 @@ return {
         lsp_saga = false,
         lsp_trouble = false,
         markdown = true,
+        markview = true,
         mason = true,
         mini = { enabled = false, indentscope_color = "green" },
         snacks = {
@@ -113,6 +114,10 @@ return {
         all = function(C)
           return {
             -- Statusline
+            StatusLineGitBranch = {
+              fg = C.red,
+              style = { 'italic' },
+            },
             StatusLineHeader = {
               bg = C.green,
               fg = C.base,
@@ -131,6 +136,7 @@ return {
             -- Tabline
             TabLineFill = { bg = C.crust },
             TabLine = { fg = C.overlay0, bg = C.crust },
+            BetterTermSymbol = { fg = C.base, bg = C.green },
             TabLineSel = { fg = C.lavender, bg = C.base },
 
             -- Neorg

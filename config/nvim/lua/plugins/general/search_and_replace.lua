@@ -4,9 +4,9 @@ return {
     "AckslD/muren.nvim",
     keys = {
       {
-        "[r",
+        "<leader>rp",
         ":MurenToggle<CR>",
-        desc = "[r]eplace pattern",
+        desc = "Search [r]eplace [p]attern",
       },
     },
     config = utils.setup "muren",
@@ -16,11 +16,11 @@ return {
     keys = {
       {
         mode = { "n", "x" },
-        "]r",
+        "<leader>rs",
         function()
           require("ssr").open()
         end,
-        desc = "[r]eplace structure",
+        desc = "Search [r]eplace [s]tructure",
       },
     },
     name = "ssr",

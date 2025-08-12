@@ -1,11 +1,6 @@
 local setup = require('utils.fn').setup
 return {
   {
-    'vhyrro/luarocks.nvim',
-    priority = 1000,
-    config = true,
-  },
-  {
 
     'williamboman/mason.nvim',
     cmd = 'Mason',
@@ -15,6 +10,8 @@ return {
         'stylua',
         'shfmt',
         'lua-language-server',
+        'efm',
+        'luacheck',
       },
     },
     ---@param opts MasonSettings | {ensure_installed: string[]}
@@ -55,40 +52,7 @@ return {
     'mbbill/undotree',
     cmd = 'UndotreeToggle',
     keys = {
-      { '<leader>u', '<cmd>UndotreeToggle<cr>', desc = '[U]ndotree' },
-    },
-  },
-  {
-    'stevearc/conform.nvim',
-    opts = {
-      formatters_by_ft = {
-        json = { 'jq' },
-        bib = { 'bibtex-tidy' },
-        tex = { 'tex-fmt' },
-      },
-      formatters = {
-        ["tex-fmt"] = {
-          args = {
-            "-s",
-            "--wraplen",
-            "112",
-          },
-        },
-        ["bibtex-tidy"] = {
-          args = {
-            "--curly",
-            "--numeric",
-            "--align=13",
-            "--blank-lines",
-            "--duplicates=key,doi,citation,abstract",
-            "--merge",
-            "--sort-fields",
-            "--remove-empty-fields",
-            "--wrap=106",
-            "$FILENAME"
-          },
-        },
-      },
+      { '<leader>ut', '<cmd>UndotreeToggle<cr>', desc = '[U]ndotree' },
     },
   },
   {
@@ -105,23 +69,26 @@ return {
     },
     opts = {
       backend = 'delta',
-      picker = { "snacks" }
+      picker = { 'snacks' },
     },
     dependencies = {
       { 'nvim-lua/plenary.nvim' },
     },
   },
   {
-    "rachartier/tiny-inline-diagnostic.nvim",
-    event = "LspAttach",
-    priority = 1000,
+    'rachartier/tiny-inline-diagnostic.nvim',
+    event = 'LspAttach',
     config = function()
       require('tiny-inline-diagnostic').setup()
-    end
+    end,
   },
   {
     'folke/ts-comments.nvim',
     event = 'BufEnter',
     opts = {},
+  },
+  {
+    'nvzone/minty',
+    cmd = { 'Shades', 'Huefy' },
   },
 }

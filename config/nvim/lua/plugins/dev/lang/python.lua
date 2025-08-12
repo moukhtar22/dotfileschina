@@ -14,9 +14,10 @@ return {
     'williamboman/mason.nvim',
     opts = function(_, opts)
       opts.ensure_installed = opts.ensure_installed or {}
-      table.insert(opts.ensure_installed, 'basedpyright')
-      -- table.insert(opts.ensure_installed, 'pylyzer')
-      table.insert(opts.ensure_installed, 'ruff')
+      vim.list_extend(
+        opts.ensure_installed,
+        { 'basedpyright', 'ruff', "pyrefly" }
+      )
     end,
   },
   {
@@ -43,7 +44,7 @@ return {
       -- stylua: ignore
       keys = {
         { "<leader>dPt", function() require('dap-python').test_method() end, desc = "Debug Method", ft = "python" },
-        { "<leader>dPc", function() require('dap-python').test_class() end, desc = "Debug Class", ft = "python" },
+        { "<leader>dPc", function() require('dap-python').test_class() end,  desc = "Debug Class",  ft = "python" },
       },
       config = function()
         local python_env_path = '$(poetry env info -p)/bin/python'
@@ -62,25 +63,6 @@ return {
     opts = {
       handlers = {
         python = function() end,
-      },
-    },
-  },
-  { -- directly open ipynb files as quarto docuements
-    -- and convert back behind the scenes
-    'GCBallesteros/jupytext.nvim',
-    ft = 'jupyter',
-    opts = {
-      custom_language_formatting = {
-        python = {
-          extension = 'qmd',
-          style = 'quarto',
-          force_ft = 'quarto',
-        },
-        r = {
-          extension = 'qmd',
-          style = 'quarto',
-          force_ft = 'quarto',
-        },
       },
     },
   },

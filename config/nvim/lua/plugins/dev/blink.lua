@@ -1,14 +1,17 @@
+local icons = require('utils.static.icons')
 return {
   {
     'supermaven-inc/supermaven-nvim',
     event = 'InsertEnter',
     opts = {
       keymaps = {
-        accept_suggestion = '<C-I>',
-        clear_suggestion = '<C-CR>',
+        accept_suggestion = '<C-CR>',
+        clear_suggestion = '<C-BS>',
         accept_word = '<C-J>',
       },
       ignore_filetypes = { 'bigfile' },
+      -- disable_inline_completion = true,
+      -- disable_keymaps = true,
     },
   },
   {
@@ -37,112 +40,83 @@ return {
             end,
           },
         },
-        -- config = function()
-        --   local ls = require('luasnip')
-        --   local ls_types = require('luasnip.util.types')
-        --   local ls_ft = require('luasnip.extras.filetype_functions')
-        --   local static = require('utils.static')
-        --
-        --   ---Filetypes for which snippets have been loaded
-        --   ---@type table<string, boolean>
-        --   local loaded_fts = {}
-        --
-        --   ---Load snippets for a given filetype
-        --   ---@param ft string?
-        --   ---@return nil
-        --   local function load_snippets(ft)
-        --     if not ft or loaded_fts[ft] then
-        --       return
-        --     end
-        --     loaded_fts[ft] = true
-        --
-        --     local ok, snip_groups = pcall(require, 'snippets.' .. ft)
-        --     if ok then
-        --       for _, snip_group in pairs(snip_groups) do
-        --         ls.add_snippets(
-        --           ft,
-        --           snip_group.snip or snip_group,
-        --           snip_group.opts or {}
-        --         )
-        --       end
-        --     end
-        --   end
-        --
-        --   -- Trigger markdown snippets when filetype is 'markdown_inline' or 'html' or
-        --   -- 'html_inline' (lang returned from treesitter when using
-        --   -- `from_pos_or_filetype()` as the filetype function)
-        --   local lang_ft_map = {
-        --     commonlisp = 'lisp',
-        --     glimmer = 'handlebars',
-        --     html = 'markdown',
-        --     html_inline = 'html',
-        --     latex = 'tex',
-        --     markdown_inline = 'markdown',
-        --     tsx = 'typescriptreact',
-        --   }
-        --
-        --   for lang, ft in pairs(lang_ft_map) do
-        --     ls.filetype_extend(lang, { ft })
-        --   end
-        --
-        --   ls.setup({
-        --     ft_func = function()
-        --       load_snippets('all')
-        --
-        --       local langs = ls_ft.from_pos_or_filetype()
-        --       for _, lang in ipairs(langs) do
-        --         load_snippets(lang)
-        --         load_snippets(lang_ft_map[lang])
-        --       end
-        --       return langs
-        --     end,
-        --     keep_roots = true,
-        --     link_roots = true,
-        --     exit_roots = false,
-        --     link_children = true,
-        --     region_check_events = 'CursorMoved,CursorMovedI',
-        --     delete_check_events = 'TextChanged,TextChangedI',
-        --     enable_autosnippets = true,
-        --     store_selection_keys = '<Tab>',
-        --     ext_opts = {
-        --       [ls_types.choiceNode] = {
-        --         active = {
-        --           virt_text = { { static.icons.ArrowUpDown, 'Number' } },
-        --         },
-        --       },
-        --       [ls_types.insertNode] = {
-        --         unvisited = {
-        --           virt_text = { { static.boxes.single.vt, 'NonText' } },
-        --           virt_text_pos = 'inline',
-        --         },
-        --       },
-        --       [ls_types.exitNode] = {
-        --         unvisited = {
-        --           virt_text = { { static.boxes.single.vt, 'NonText' } },
-        --           virt_text_pos = 'inline',
-        --         },
-        --       },
-        --     },
-        --   })
-        --
-        --   -- Unlink current snippet on leaving insert/selection mode
-        --   -- https://github.com/L3MON4D3/LuaSnip/issues/258#issuecomment-1011938524
-        --   vim.api.nvim_create_autocmd('ModeChanged', {
-        --     desc = 'Unlink current snippet on leaving insert/selection mode.',
-        --     group = vim.api.nvim_create_augroup('LuaSnipModeChanged', {}),
-        --     callback = function(info)
-        --       local mode = vim.v.event.new_mode
-        --       local omode = vim.v.event.old_mode
-        --       if
-        --         (omode == 's' and mode == 'n' or omode == 'i')
-        --         and ls.session.current_nodes[info.buf]
-        --         and not ls.session.jump_active
-        --       then
-        --         ls.unlink_current()
-        --       end
-        --     end,
-        --   })
-        -- end,
+        config = function()
+          local ls = require('luasnip')
+          local ls_types = require('luasnip.util.types')
+          local ls_ft = require('luasnip.extras.filetype_functions')
+          local utils = require('utils')
+
+          ---Load snippets for a given filetype
+          ---@param ft string?
+          local function load_snippets(ft)
+            ft = ft or vim.bo.ft
+
+            utils.ft.load_once('snippets', ft, function(_, snips)
+              if not snips or vim.tbl_isempty(snips) then
+                return false
+              end
+              for _, group in pairs(snips) do
+                ls.add_snippets(ft, group.snip or group, group.opts or {})
+              end
+              return true
+            end)
+          end
+
+          ls.setup({
+            ft_func = function()
+              load_snippets('all')
+              local langs = ls_ft.from_pos_or_filetype()
+              for _, lang in ipairs(langs) do
+                load_snippets(lang)
+              end
+              return langs
+            end,
+            keep_roots = true,
+            link_roots = true,
+            exit_roots = false,
+            link_children = true,
+            region_check_events = 'CursorMoved,CursorMovedI,InsertEnter',
+            delete_check_events = 'TextChanged,TextChangedI,InsertLeave',
+            enable_autosnippets = true,
+            cut_selection_keys = '<Tab>',
+            ext_opts = {
+              [ls_types.choiceNode] = {
+                active = {
+                  virt_text = {
+                    {
+                      utils.static.icons.ArrowUpDown,
+                      'Number',
+                    },
+                  },
+                },
+              },
+            },
+          })
+
+          -- Unlink current snippet on leaving insert/select mode
+          -- https://github.com/L3MON4D3/LuaSnip/issues/258#issuecomment-1011938524
+          vim.api.nvim_create_autocmd('ModeChanged', {
+            desc = 'Unlink current snippet on leaving insert/selection mode.',
+            group = vim.api.nvim_create_augroup('LuaSnipModeChanged', {}),
+            pattern = '[si]*:[^si]*',
+            -- Blink.cmp will enter normal mode shortly on accepting snippet completion,
+            -- see https://github.com/Saghen/blink.cmp/issues/2035
+            -- We don't want to unlink the current snippet in that case, as a workaround
+            -- wait a short time after leaving insert/select mode and unlink current
+            -- snippet if still not inside insert/select mode
+            callback = vim.schedule_wrap(function(args)
+              if vim.fn.mode():match('^[si]') then -- still in insert/select mode
+                return
+              end
+              if
+                ls.session.current_nodes[args.buf]
+                and not ls.session.jump_active
+              then
+                ls.unlink_current()
+              end
+            end),
+          })
+        end,
       },
       {
         'saghen/blink.compat',
@@ -150,21 +124,31 @@ return {
         opts = {},
       },
       'mikavilpas/blink-ripgrep.nvim',
-      'Kaiser-Yang/blink-cmp-dictionary',
     },
     ---@module 'blink.cmp'
     ---@type blink.cmp.Config
     opts = {
+      enabled = function()
+        return vim.fn.reg_recording() == '' and vim.fn.reg_executing() == ''
+      end,
       keymap = { preset = 'enter' },
       appearance = {
         use_nvim_cmp_as_default = true,
         nerd_font_variant = 'mono',
       },
       completion = {
-        documentation = { auto_show = true },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 0,
+          window = {
+            border = 'solid',
+          },
+        },
         ghost_text = { enabled = false },
-        list = { selection = { preselect = false } },
+        list = { selection = { preselect = false, auto_insert = true } },
         menu = {
+          -- min_width = math.floor(vim.go.pumwidth),
+          -- max_height = math.floor(vim.go.pumheight),
           draw = {
             columns = {
               { 'kind_icon' },
@@ -195,20 +179,16 @@ return {
           'path',
           'buffer',
           'ripgrep',
-          'supermaven',
         },
         per_filetype = {
-          AvanteInput = { 'supermaven' },
-          codecompanion = { 'supermaven', 'codecompanion' },
+          codecompanion = { 'codecompanion' },
           markdown = {
             'snippets',
             'lsp',
             'path',
             'buffer',
             'ripgrep',
-            'supermaven',
             'pandoc_references',
-            'dictionary',
           },
           norg = {
             'snippets',
@@ -216,8 +196,6 @@ return {
             'path',
             'buffer',
             'ripgrep',
-            'supermaven',
-            'dictionary',
           },
           quarto = {
             'snippets',
@@ -225,9 +203,7 @@ return {
             'path',
             'buffer',
             'ripgrep',
-            'supermaven',
             'pandoc_references',
-            'dictionary',
           },
           tex = {
             'snippets',
@@ -235,17 +211,11 @@ return {
             'path',
             'buffer',
             'ripgrep',
-            'supermaven',
             'pandoc_references',
-            -- 'dictionary',
           },
         },
         -- cmdline = {},
         providers = {
-          dictionary = {
-            module = 'blink-cmp-dictionary',
-            name = 'Dict',
-          },
           ripgrep = {
             module = 'blink-ripgrep',
             name = 'Ripgrep',
@@ -254,20 +224,9 @@ return {
             ---@module "blink-ripgrep"
             ---@type blink-ripgrep.Options
             opts = {
-              -- For many options, see `rg --help` for an exact description of
-              -- the values that ripgrep expects.
-
-              -- the minimum length of the current word to start searching
-              -- (if the word is shorter than this, the search will not start)
               prefix_min_len = 3,
 
-              -- The number of lines to show around each match in the preview window
               context_size = 5,
-
-              -- The maximum file size that ripgrep should include in its search.
-              -- Useful when your project contains large files that might cause
-              -- performance issues.
-              -- Examples: "1024" (bytes by default), "200K", "1M", "1G"
               max_filesize = '1G',
             },
           },
@@ -276,20 +235,83 @@ return {
             module = 'blink.compat.source',
             score_offset = -1,
           },
-          supermaven = {
-            name = 'supermaven',
-            module = 'blink.compat.source',
-            score_offset = 100,
-            async = true,
-          },
           snippets = {
-            score_offset = 99,
+            score_offset = 100,
           },
           lsp = {
-            score_offset = 98,
+            score_offset = 99,
+
+            -- Don't wait for LSP completions for a long time before fallback to
+            -- buffer completions
+            -- - https://github.com/Saghen/blink.cmp/issues/2042
+            -- - https://cmp.saghen.dev/configuration/sources.html#show-buffer-completions-with-lsp
+            timeout_ms = 500,
+          },
+          cmdline = {
+            -- Don't complete left parenthesis when calling functions or
+            -- expressions in cmdline, e.g. `:call func(...`
+            transform_items = function(_, items)
+              is_cmd_expr_compl = vim.tbl_contains(
+                { 'function', 'expression' },
+                require('blink.cmp.sources.lib.utils').get_completion_type(
+                  require('blink.cmp.completion.trigger.context').get_mode()
+                )
+              )
+
+              if not is_cmd_expr_compl then
+                return items
+              end
+
+              for _, item in ipairs(items) do
+                item.textEdit.newText = item.textEdit.newText:gsub('%($', '')
+                item.label = item.textEdit.newText
+              end
+              return items
+            end,
           },
           buffer = {
-            score_offset = 97,
+            -- Keep first letter capitalization on buffer source
+            -- https://cmp.saghen.dev/recipes.html#keep-first-letter-capitalization-on-buffer-source
+            transform_items = function(ctx, items)
+              local keyword = ctx.get_keyword()
+              if not (keyword:match('^%l') or keyword:match('^%u')) then
+                return items
+              end
+
+              local pattern ---@type string
+              local case_func ---@type function
+              if keyword:match('^%l') then
+                pattern = '^%u%l+$'
+                case_func = string.lower
+              else
+                pattern = '^%l+$'
+                case_func = string.upper
+              end
+
+              local seen = {}
+              local out = {}
+              for _, item in ipairs(items) do
+                if not item.insertText then
+                  goto continue
+                end
+
+                if item.insertText:match(pattern) then
+                  local text = case_func(item.insertText:sub(1, 1))
+                    .. item.insertText:sub(2)
+                  item.insertText = text
+                  item.label = text
+                end
+
+                if seen[item.insertText] then
+                  goto continue
+                end
+                seen[item.insertText] = true
+
+                table.insert(out, item)
+                ::continue::
+              end
+              return out
+            end,
           },
         },
       },

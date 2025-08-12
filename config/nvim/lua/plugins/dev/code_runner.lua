@@ -4,7 +4,7 @@ local folder = ''
 return {
   'CRAG666/code_runner.nvim',
   -- name = "code_runner",
-  cmd = 'RunCode',
+  cmd = { 'RunCode', 'RunFile', 'RunProject' },
   dev = true,
   keys = {
     {
@@ -18,7 +18,7 @@ return {
   opts = {
     mode = 'better_term',
     better_term = {
-      number = 2,
+      number = 1,
     },
     filetype = {
       v = 'v run',
@@ -26,8 +26,19 @@ return {
         require('code_runner.hooks.ui').select({
           Project = function()
             require('code_runner.hooks.tectonic').build(
+              preview_cmd
+            )
+          end,
+          ["Project + Biber"] = function()
+            require('code_runner.hooks.tectonic').build(
               preview_cmd,
-              { '--keep-intermediates', '--keep-logs' }
+              { "biber", '--keep-intermediates', '--keep-logs' }
+            )
+          end,
+          ["Project + intermediates"] = function()
+            require('code_runner.hooks.tectonic').build(
+              preview_cmd,
+              { "biber", '--keep-intermediates', '--keep-logs' }
             )
           end,
           Single = function()
@@ -78,9 +89,6 @@ return {
           end,
         })
       end,
-      javascript = 'node',
-      java = 'cd $dir && javac $fileName && java $fileNameWithoutExt',
-      kotlin = 'cd $dir && kotlinc-native $fileName -o $fileNameWithoutExt && ./$fileNameWithoutExt.kexe',
       c = function(...)
         c_base = {
           'cd $dir &&',
@@ -124,9 +132,7 @@ return {
       end,
       python = "python -u '$dir/$fileName'",
       sh = 'bash',
-      typescript = 'deno run',
       typescriptreact = 'yarn dev$end',
-      rust = 'cd $dir && rustc $fileName && $dir$fileNameWithoutExt',
     },
     project_path = vim.fn.expand('~/.config/nvim/project_manager.json'),
   },

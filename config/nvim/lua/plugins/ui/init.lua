@@ -18,14 +18,7 @@ return {
     'folke/which-key.nvim',
     event = 'VeryLazy',
     opts = {
-      -- window = { position = "top" },
       preset = "modern",
-      icons = {
-        breadcrumb = '»',
-        separator = '➜',
-        group = '…',
-      },
-      spelling = { enabled = true },
     },
   },
   {
@@ -112,8 +105,11 @@ return {
     }
   },
   {
-    'folke/todo-comments.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim' },
+    "folke/todo-comments.nvim",
+    keys = {
+      { "<leader>st", function() Snacks.picker.todo_comments() end,                                          desc = "Todo" },
+      { "<leader>sT", function() Snacks.picker.todo_comments({ keywords = { "TODO", "FIX", "FIXME" } }) end, desc = "Todo/Fix/Fixme" },
+    },
   },
   {
     'hat0uma/csvview.nvim',
@@ -128,18 +124,18 @@ return {
     end,
   },
   {
-    '3rd/image.nvim',
-    ft = { 'markdown', 'norg', 'quarto' },
-    build = false,
-    opts = {
-      processor = 'magick_cli',
-      window_overlap_clear_enabled = true,
-      clear_in_insert_mode = true,
-      integrations = {
-        markdown = {
-          filetypes = { 'markdown', 'vimwiki', 'quarto' }, -- markdown extensions (ie. quarto) can go here
-        },
-      },
-    },
+    "chentoast/marks.nvim",
+    event = "VeryLazy",
+    opts = {},
   },
+  {
+    "nvzone/showkeys",
+    cmd = "ShowkeysToggle",
+    opts = {
+      timeout = 1,
+      maxkeys = 5,
+      position = "top-right",
+      -- more opts
+    }
+  }
 }

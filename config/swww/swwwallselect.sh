@@ -28,7 +28,7 @@ readonly HYPR_BORDER_DEFAULT=2 # Valor predeterminado para el borde de Hyprland
 
 # Directorios de búsqueda de fondos de pantalla (puede ser una lista separada por espacios o una ruta única)
 # Ejemplo: WALLPAPER_PATHS=("${HOME}/Imágenes/Fondos" "${HOME}/OtrosFondos")
-WALLPAPER_PATHS=("${HOME}/Imágenes/wallpaperCicle") # Original
+WALLPAPER_PATHS=("/mnt/home/Imágenes/wallpaperCicle") # Original
 
 #// Crear directorio de miniaturas si no existe
 mkdir -p "${THUMB_DIR}"
@@ -147,7 +147,7 @@ if ! [[ "$rofi_scale_input" =~ ^[0-9]+$ ]]; then # Validar que sea un número
     rofi_scale_input=10
 fi
 readonly ROFI_SCALE="$rofi_scale_input"
-readonly ROFI_THEME_SCALE_OVERRIDE="configuration {font: \"SF Pro Display ${ROFI_SCALE}\";}"
+readonly ROFI_THEME_SCALE_OVERRIDE="configuration {font: \"SFProDisplay Nerd Font ${ROFI_SCALE}\";}"
 
 #// Borde de elementos de Rofi basado en hypr_border
 hypr_border_val="${hypr_border:-$HYPR_BORDER_DEFAULT}" # Usar variable de entorno si existe, sino el default del script

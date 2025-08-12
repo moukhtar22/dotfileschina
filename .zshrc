@@ -169,15 +169,15 @@ alias la="exa --icons -la"
 # alias cp='rsync --progress -avz'
 cd() { pushd $1 && ls; }
 alias tree="exa --icons --tree --level=4 --long --git"
-alias v="nvim"
-alias vi="nvim"
+alias vi="NVIM_APPNAME=nvim-minimal nvim"
 alias vim="nvim"
 alias zt="/bin/zathura --fork"
+alias zb="zen-browser"
 alias lo="/bin/libreoffice"
 alias music="termusic"
 alias rm='rm -i'
 alias dus='du -h --max-depth=1 2>/dev/null | sort -hr'
-alias du1='du -h -d 1'
+alias du1='du -h -d 1 2>/dev/null | sort -hr'
 alias rec="wl-screenrec --dri-device $MOZ_DRM_DEVICE -f $(date +'%s_grab.mp4')"
 alias neofetch="fastfetch -l ~/.config/fastfetch/thinkpad.txt --logo-color-1 white --logo-color-2 red --logo-color-3 '38;2;23;147;209'"
 alias freq="watch -n1 'grep Hz /proc/cpuinfo'"
@@ -225,6 +225,7 @@ alias pacr="pacman -Qq | fzf --multi --preview 'pacman -Qi {1}' | xargs -ro sudo
 alias ys="yay -Slq | fzf --multi --preview 'yay -Si {1}' | xargs -ro yay -S"
 alias ci="{ find . -xdev -printf '%h\n' | sort | uniq -c | sort -k 1 -n; } 2>/dev/null"
 alias gbc="git switch -c"
+alias fontl="fc-list | cut -d ':' -f2 | sort | uniq"
 
 # -< Environ variable >-
 export MYSQL_PS1="\n \d  ﯐ "
@@ -233,7 +234,7 @@ export EDITOR=$VISUAL
 export PYTHONSTARTUP=~/.pyrc
 export BAT_THEME="Catppuccin-mocha"
 export USB="/run/media/$USER"
-export PATH="$PATH:$HOME/.dotnet/tools:$HOME/.local/share/bob/nvim-bin:$HOME/.local/share/nvim/mason/bin:$HOME/.local/bin"
+export PATH="$HOME/.local/bin:$HOME/.dotnet/tools:$HOME/.local/share/bob/nvim-bin:$HOME/.local/share/nvim/mason/bin:$HOME/.config/emacs/bin:$HOME/.npm-global/bin:$PATH"
 export FZF_DEFAULT_COMMAND='fd . --type f --hidden --follow --exclude .git --no-ignore'
 export FZF_DEFAULT_OPTS=" --prompt='ﰉ ' --pointer='ﰊ' --height 40% --reverse --bind='?:toggle-preview' \
 --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8 \
@@ -241,9 +242,8 @@ export FZF_DEFAULT_OPTS=" --prompt='ﰉ ' --pointer='ﰊ' --height 40% --reverse
 --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
 
 # Working with documents
-
+alias pandock='podman run --rm -v "$(pwd):/data" pandoc/extra'
 export MARPT=~/Documentos/Proyectos/Writings/utils/marp/themes
-export EISVOGEL=~/Documentos/Proyectos/Writings/utils/latex/eisvogel.tex
 export IEEESTL=~/Documentos/Proyectos/Writings/utils/latex/ieee.csl
 export LCOLORCATPPUCCIN=~/Documentos/Proyectos/Writings/utils/latex/catppuccin
 
@@ -265,3 +265,4 @@ source ~/.zshfunc
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 export NVM_NF=true
 # FPATH="/usr/share/zsh/site-functions:${FPATH}"
+source ~/.env

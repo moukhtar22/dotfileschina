@@ -33,8 +33,8 @@ set.number = true
 set.relativenumber = true
 set.cursorline = true
 set.cursorcolumn = true
-set.scrolloff = 99
-set.sidescrolloff = 99
+set.scrolloff = 10
+set.sidescrolloff = 10
 set.splitright = true
 set.splitbelow = true
 set.laststatus = 3
@@ -53,7 +53,7 @@ set.listchars = {
   extends = '→',
   nbsp = '␣',
 }
-set.smoothscroll = true
+set.smoothscroll = false
 
 -- =============================
 -- Text and Formatting
@@ -63,11 +63,12 @@ set.shiftwidth = 4
 set.softtabstop = 4
 set.ts = 4
 set.autoindent = true
+set.copyindent = true
 set.smartindent = true
 set.linebreak = true
 set.breakindent = true
 set.textwidth = 106
-set.formatoptions = 'jcroqlnt' -- tcqj
+set.formatoptions = 'jcroqlnt'
 
 -- =============================
 -- Search Configuration
@@ -81,14 +82,14 @@ set.incsearch = true
 -- Performance
 -- =============================
 set.timeoutlen = 300
-set.updatetime = 200
+set.updatetime = 500
 
 -- =============================
 -- Key Mappings
 -- =============================
 vim.keymap.set('', '<Space>', '<Nop>', { noremap = true, silent = true })
 vim.g.mapleader = ' '
-vim.g.maplocalleader = ','
+vim.g.maplocalleader = '\\' -- Backslash for neorg leader
 
 -- =============================
 -- Folds
@@ -110,7 +111,7 @@ set.mouse = 'a'
 -- Diff and Git
 -- =============================
 set.diffopt =
-'filler,vertical,hiddenoff,linematch:60,foldcolumn:0,algorithm:minimal'
+  'filler,vertical,hiddenoff,linematch:60,foldcolumn:0,algorithm:minimal'
 
 -- =============================
 -- Wildcards and Paths
@@ -155,15 +156,15 @@ set.grepformat = '%f:%l:%c:%m'
 -- =============================
 -- Special Behaviors
 -- =============================
-set.ruler = false          -- Disable the default ruler
-set.inccommand = 'nosplit' -- preview incremental substitute
+set.ruler = false -- Disable the default ruler
+set.inccommand = 'split' -- preview incremental substitute
 set.jumpoptions = 'view'
 set.joinspaces = false
 set.virtualedit = 'block'
 set.shiftround = true
 set.smarttab = true
 set.whichwrap:append('<>[]hl')
-set.wrap = false -- Disable line wrap
+set.wrap = true
 set.errorbells = true
 set.shortmess:append({ W = true, I = true, c = true, C = true })
-set.showmode = false -- Dont show mode since we have a statusline
+set.showmode = false
