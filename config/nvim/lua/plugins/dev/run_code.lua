@@ -1,21 +1,9 @@
-local preview_cmd = '/bin/zathura'
-local folder = ''
+local key = require('utils.keymap')
 
-return {
-  'CRAG666/code_runner.nvim',
-  -- name = "code_runner",
-  cmd = { 'RunCode', 'RunFile', 'RunProject' },
-  dev = true,
-  keys = {
-    {
-      '<leader>e',
-      function()
-        require('code_runner').run_code()
-      end,
-      desc = '[e]xcute code',
-    },
-  },
-  opts = {
+local function load()
+  vim.opt.runtimepath:prepend(vim.fn.expand('~/Git/code_runner.nvim'))
+  local preview_cmd = '/bin/zathura'
+  require('code_runner').setup({
     mode = 'better_term',
     better_term = {
       number = 1,
@@ -25,26 +13,24 @@ return {
       tex = function(...)
         require('code_runner.hooks.ui').select({
           Project = function()
-            require('code_runner.hooks.tectonic').build(
-              preview_cmd
-            )
+            require('code_runner.hooks.tectonic').build(preview_cmd)
           end,
-          ["Project + Biber"] = function()
+          ['Project + Biber'] = function()
             require('code_runner.hooks.tectonic').build(
               preview_cmd,
-              { "biber", '--keep-intermediates', '--keep-logs' }
+              { 'biber', '--keep-intermediates', '--keep-logs' }
             )
           end,
-          ["Project + intermediates"] = function()
+          ['Project + intermediates'] = function()
             require('code_runner.hooks.tectonic').build(
               preview_cmd,
-              { "biber", '--keep-intermediates', '--keep-logs' }
+              { 'biber', '--keep-intermediates', '--keep-logs' }
             )
           end,
           Single = function()
             require('code_runner.hooks.preview_pdf').run({
               command = 'tectonic',
-              args = { '$fileName', "-o", "/tmp" },
+              args = { '$fileName', '-o', '/tmp' },
               preview_cmd = preview_cmd,
               overwrite_output = '/tmp',
             })
@@ -106,12 +92,6 @@ return {
           )
         end)
       end,
-      -- cpp = {
-      --   'cd $dir &&',
-      --   'g++ $fileName',
-      --   '-o /tmp/$fileNameWithoutExt &&',
-      --   '/tmp/$fileNameWithoutExt',
-      -- },
       cpp = function(...)
         cpp_base = {
           [[cd '$dir' &&]],
@@ -135,5 +115,9 @@ return {
       typescriptreact = 'yarn dev$end',
     },
     project_path = vim.fn.expand('~/.config/nvim/project_manager.json'),
-  },
-}
+  })
+end
+
+key.map_lazy('code_runner', load, 'n', '<leader>e', function()
+  require('code_runner').run_code()
+end, { desc = 'Execute code' })

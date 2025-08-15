@@ -1,13 +1,37 @@
-return {
-  "folke/flash.nvim",
-  ---@type Flash.Config
-  opts = {},
-  -- stylua: ignore
-  keys = {
-    { "s",     mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
-    { "S",     mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
-    { "r",     mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
-    { "R",     mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-    { "<c-s>", mode = { "c" },           function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+local key = require('utils.keymap')
+
+local function setup_flash()
+  vim.pack.add({
+    'https://github.com/folke/flash.nvim',
+  })
+  require('flash').setup({})
+end
+
+key.maps_lazy('flash', setup_flash, { 'n', 'x', 'o' }, '', {
+  {
+    's',
+    function()
+      require('flash').jump()
+    end,
+    'Flash',
   },
-}
+  {
+    'S',
+    function()
+      require('flash').treesitter()
+    end,
+    'Flash Treesitter',
+  },
+})
+
+key.map_lazy('flash', setup_flash, 'o', 'r', function()
+  require('flash').remote()
+end, { desc = 'Remote Flash' })
+
+key.map_lazy('flash', setup_flash, { 'o', 'x' }, 'R', function()
+  require('flash').treesitter_search()
+end, { desc = 'Treesitter Search' })
+
+key.map_lazy('flash', setup_flash, 'c', '<c-s>', function()
+  require('flash').toggle()
+end, { desc = 'Toggle Flash Search' })

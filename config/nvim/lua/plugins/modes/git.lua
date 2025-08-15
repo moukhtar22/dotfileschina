@@ -1,22 +1,18 @@
-return {
+local key = require('utils.keymap')
+
+key.maps_lazy(
+  'fugit2',
+  function()
+    vim.pack.add({
+      'https://github.com/SuperBo/fugit2.nvim',
+      'https://github.com/chrisgrieser/nvim-tinygit',
+    })
+    require('fugit2').setup({ width = 100 })
+  end,
+  'n',
+  '<leader>g',
   {
-    'SuperBo/fugit2.nvim',
-    build = false,
-    opts = {
-      width = 100,
-    },
-    dependencies = {
-      'MunifTanjim/nui.nvim',
-      'nvim-lua/plenary.nvim',
-      {
-        'chrisgrieser/nvim-tinygit', -- optional: for Github PR view
-        dependencies = { 'stevearc/dressing.nvim' }
-      },
-    },
-    cmd = { 'Fugit2', 'Fugit2Diff', 'Fugit2Graph' },
-    keys = {
-      { '<leader>gm', mode = 'n', '<cmd>Fugit2<cr>',      desc = 'Git Mode' },
-      { '<leader>gg', mode = 'n', '<cmd>Fugit2Graph<cr>', desc = 'Git Graph' },
-    }
-  },
-}
+    { 'm', 'Fugit2', 'Git Mode' },
+    { 'g', 'Fugit2Graph', 'Git Graph' },
+  }
+)
