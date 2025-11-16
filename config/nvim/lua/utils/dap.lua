@@ -1,11 +1,11 @@
 local M = {}
 
----@class dapcache_t
+---@class dap.cache
 ---@field progs table<string, string> maps source file path to program path
 ---@field args table<string, string> maps source file path to arguments
 
 ---Create a new cache table for DAP program paths and arguments
----@return dapcache_t
+---@return dap.cache
 function M.new_cache()
   return {
     progs = {},
@@ -15,7 +15,7 @@ end
 
 ---Returns a function that gets arguments for the current buffer, using cached
 ---arguments if arguments are provided before
----@param cache dapcache_t
+---@param cache dap.cache
 ---@return fun(): string[]?
 function M.get_args(cache)
   return function()
@@ -26,17 +26,20 @@ function M.get_args(cache)
       completion = 'file',
       default = cache.args[bufname],
     }, function(input)
-      cache.args[bufname] = input
+      if input and input ~= '' then
+        cache.args[bufname] = input
+      end
       vim.cmd.stopinsert()
     end)
 
-    return cache.args[bufname] and vim.split(cache.args[bufname], ' ') or nil
+    return cache.args[bufname]
+      and require('utils.cmd').split(cache.args[bufname])
   end
 end
 
 ---Return a function that gets the path to the executable for the current
 ---buffer, using cached executable path when possible
----@param cache dapcache_t
+---@param cache dap.cache
 ---@return fun(): string?
 function M.get_prog(cache)
   return function()

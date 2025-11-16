@@ -3,7 +3,7 @@
 -- Author:       Bekaboo <kankefengjing@gmail.com>
 -- Maintainer:   Bekaboo <kankefengjing@gmail.com>
 -- License:      GPL-3.0
--- Last Updated: Wed Aug 20 12:21:51 2025
+-- Last Updated: Wed 01 Oct 2025 01:33:37 AM EDT
 
 -- Clear hlgroups and set colors_name {{{
 vim.cmd.hi('clear')
@@ -204,6 +204,10 @@ local hlgroups = {
 
   -- Treesitter syntax {{{2
   ['@attribute.builtin'] = { link = 'Special' },
+  ['@comment.error'] = { bg = c_red, fg = c_bg1, bold = true },
+  ['@comment.note'] = { bg = c_green, fg = c_bg1, bold = true },
+  ['@comment.todo'] = { bg = c_blue, fg = c_bg1, bold = true },
+  ['@comment.warning'] = { bg = c_yellow, fg = c_bg1, bold = true },
   ['@conceal'] = { fg = c_grey },
   ['@constructor.lua'] = {},
   ['@diff.delta'] = { link = 'DiffChanged' },
@@ -222,6 +226,8 @@ local hlgroups = {
   ['@markup.heading.4.marker.markdown'] = { link = '@conceal' },
   ['@markup.heading.5.marker.markdown'] = { link = '@conceal' },
   ['@markup.heading.6.marker.markdown'] = { link = '@conceal' },
+  ['@markup.heading.1.delimiter.vimdoc'] = { link = 'helpSectionDelim' },
+  ['@markup.heading.2.delimiter.vimdoc'] = { link = 'helpSectionDelim' },
   ['@markup.italic'] = { italic = true },
   ['@markup.link'] = { fg = c_purple, underline = true },
   ['@markup.link.label'] = { link = 'SpecialChar' },
@@ -249,7 +255,7 @@ local hlgroups = {
   -- LSP semantic {{{2
   ['@lsp.mod.deprecated'] = { link = 'DiagnosticDeprecated' },
   ['@lsp.type.class'] = { link = '@type' },
-  ['@lsp.type.comment'] = { link = '@comment' },
+  ['@lsp.type.comment'] = {}, -- avoid interfere with `@comment.note/todo/warning/error`
   ['@lsp.type.decorator'] = { link = '@function' },
   ['@lsp.type.enum'] = { link = '@type' },
   ['@lsp.type.enumMember'] = { link = '@property' },
@@ -259,7 +265,6 @@ local hlgroups = {
   ['@lsp.type.interface'] = { link = '@type' },
   ['@lsp.type.keyword'] = { link = '@keyword' },
   ['@lsp.type.macro'] = { link = '@const.macro' },
-  ['@lsp.type.method'] = { link = '@method' },
   ['@lsp.type.modifier'] = { link = '@type.qualifier' },
   ['@lsp.type.namespace'] = { link = '@module' },
   ['@lsp.type.number'] = { link = '@number' },
