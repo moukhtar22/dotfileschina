@@ -24,6 +24,14 @@ M.snippets = {
     trig = 'ret',
     desc = 'return statement',
   }, t('return')),
+  us.sn({
+    trig = 'cont',
+    desc = 'continue statement',
+  }, t('continue')),
+  us.sn({
+    trig = 'brk',
+    desc = 'break statement',
+  }, t('break')),
   us.sn(
     {
       trig = 'pr',
@@ -572,6 +580,48 @@ M.snippets = {
     {
       stored = {
         idx = i(nil, 'i'),
+      },
+    }
+  ),
+  us.msn(
+    {
+      { trig = 'f_' },
+      { trig = 'f-' },
+      { trig = 'for_' },
+      { trig = 'for-' },
+      common = { desc = 'for _ := ... loop' },
+    },
+    c(1, {
+      un.fmtad(
+        [[
+          for <idx> := range <length> {
+          <body>
+          }
+        ]],
+        {
+          idx = r(1, 'idx'),
+          length = i(2, 'length'),
+          body = un.body(3, 1),
+        }
+      ),
+      un.fmtad(
+        [[
+          for <idx> := <iter>; <cond>; <update> {
+          <body>
+          }
+        ]],
+        {
+          idx = r(1, 'idx'),
+          iter = i(2, 'iter'),
+          cond = i(3, 'cond'),
+          update = i(4, 'update'),
+          body = un.body(5, 1),
+        }
+      ),
+    }),
+    {
+      stored = {
+        idx = i(nil, '_'),
       },
     }
   ),

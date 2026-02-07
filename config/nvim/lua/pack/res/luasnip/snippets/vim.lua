@@ -10,6 +10,18 @@ local t = ls.text_node
 local d = ls.dynamic_node
 
 M.snippets = {
+  us.sn({
+    trig = 'ret',
+    desc = 'return statement',
+  }, t('return')),
+  us.sn({
+    trig = 'cont',
+    desc = 'continue statement',
+  }, t('continue')),
+  us.sn({
+    trig = 'brk',
+    desc = 'break statement',
+  }, t('break')),
   us.msn({
     { trig = 'pr' },
     { trig = 'ec' },
@@ -164,10 +176,14 @@ M.snippets = {
       }
     )
   ),
-  us.sn(
+  us.msn(
     {
-      trig = 'for',
-      desc = 'for loop (list)',
+      { trig = 'for' },
+      { trig = 'fr' },
+      { trig = 'forr' },
+      { trig = 'forange' },
+      { trig = 'forrange' },
+      common = { desc = 'for loop (list)' },
     },
     un.fmtad(
       [[
@@ -178,6 +194,44 @@ M.snippets = {
       {
         var = i(1, 'var'),
         list = i(2, 'list'),
+        body = un.body(3, 1),
+      }
+    )
+  ),
+  us.msn(
+    {
+      { trig = 'fi' },
+      { trig = 'fori' },
+      common = { desc = 'for i in range(...) loop' },
+    },
+    un.fmtad(
+      [[
+        for <idx> in range(<range>)
+        <body>
+        endfor
+      ]],
+      {
+        idx = i(1, 'i'),
+        range = i(2),
+        body = un.body(3, 1),
+      }
+    )
+  ),
+  us.msn(
+    {
+      { trig = 'f_' },
+      { trig = 'for_' },
+      common = { desc = 'for _ in range(...) loop' },
+    },
+    un.fmtad(
+      [[
+        for <idx> in range(<range>)
+        <body>
+        endfor
+      ]],
+      {
+        idx = i(1, '_'),
+        range = i(2),
         body = un.body(3, 1),
       }
     )

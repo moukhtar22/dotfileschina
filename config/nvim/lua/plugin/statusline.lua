@@ -1,6 +1,6 @@
 local utils = require('utils')
 local icons = require('utils.static.icons')
-local groupid = vim.api.nvim_create_augroup('my.statusline', {})
+local groupid = vim.api.nvim_create_augroup('statusline', {})
 
 _G._statusline = {}
 
@@ -597,8 +597,16 @@ function _G._statusline.info()
     add_section(_G._statusline.venv())
   end
 
-  add_section(_G._statusline.gitbranch())
-  add_section(_G._statusline.gitdiff())
+  local gbs, gitbranch = pcall(_G._statusline.gitbranch)
+  if gbs then
+    add_section(gitbranch)
+  end
+
+  local gds, gitdiff = pcall(_G._statusline.gitdiff)
+  if gds then
+    add_section(gitdiff)
+  end
+
   return vim.tbl_isempty(info) and ''
     or string.format('(%s) ', table.concat(info, ', '))
 end
