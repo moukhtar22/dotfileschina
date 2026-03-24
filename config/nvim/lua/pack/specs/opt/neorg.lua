@@ -81,10 +81,10 @@ return {
           ['core.dirman'] = {
             config = {
               workspaces = {
-                life = '~/Documentos/Org/Life/',
-                work = '~/Documentos/Org/Work/',
-                master = '~/Documentos/Proyectos/Writings/Maestria/Notes/',
-                phd = '~/Documentos/Proyectos/Writings/Doctorado/Notes/',
+                life = '~/Documents/Org/Life/',
+                work = '~/Documents/Org/Work/',
+                master = '~/Documents/Proyectos/Maestria/Notes/',
+                phd = '~/Documents/Proyectos/Doctorado/Notes/',
               },
             },
           },

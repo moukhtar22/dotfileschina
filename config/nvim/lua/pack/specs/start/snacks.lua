@@ -11,18 +11,19 @@ return {
       require('snacks').setup({
         animate = { enabled = false },
         scroll = { enabled = false },
-        bigfile = { enabled = true },
+        quickfile = { enabled = false },
         statuscolumn = { enabled = false },
+        bigfile = { enabled = true },
         dim = { enabled = true },
         indent = { enabled = true },
         scope = { enabled = true },
         layout = { enabled = true },
         picker = {
           enabled = true,
-          layout = {
-            preset = 'sidebar',
-            layout = { position = 'right' },
-          },
+          -- layout = {
+          --   preset = 'sidebar',
+          --   layout = { position = 'right' },
+          -- },
           previewers = {
             diff = {
               builtin = false,
@@ -34,7 +35,6 @@ return {
         },
         image = { enabled = true },
         explorer = { enabled = true },
-        quickfile = { enabled = false },
         input = { enabled = true },
         notifier = {
           enabled = true,
@@ -45,7 +45,7 @@ return {
           sections = {
             {
               section = 'terminal',
-              cmd = 'npx oh-my-logo@latest "Aguilar" fire --filled',
+              cmd = 'oh-my-logo "Aguilar" fire --filled',
               height = 8,
               padding = 1,
             },
@@ -101,6 +101,13 @@ return {
             require('snacks').explorer()
           end,
           'File Explorer',
+        },
+        {
+          "'",
+          function()
+            require('snacks').picker.marks()
+          end,
+          'Marks',
         },
         {
           'x',
@@ -160,13 +167,6 @@ return {
 
       local find_maps = {
         {
-          'b',
-          function()
-            require('snacks').picker.buffers()
-          end,
-          'Buffers',
-        },
-        {
           'c',
           function()
             require('snacks').picker.files({ cwd = vim.fn.stdpath('config') })
@@ -176,7 +176,7 @@ return {
         {
           'd',
           function()
-            require('snacks').picker.files()
+            require('snacks').picker.files({ cwd = vim.fn.expand('%:p:h') })
           end,
           'Find Files in directory',
         },
@@ -236,14 +236,14 @@ return {
           'Git Log Line',
         },
         {
-          's',
+          't',
           function()
             require('snacks').picker.git_status()
           end,
           'Git Status',
         },
         {
-          'S',
+          'T',
           function()
             require('snacks').picker.git_stash()
           end,
@@ -275,14 +275,7 @@ return {
           'Grep Open Buffers',
         },
         {
-          'g',
-          function()
-            require('snacks').picker.grep()
-          end,
-          'Grep',
-        },
-        {
-          '"',
+          "'",
           function()
             require('snacks').picker.registers()
           end,
@@ -311,13 +304,6 @@ return {
         },
         {
           'c',
-          function()
-            require('snacks').picker.command_history()
-          end,
-          'Command History',
-        },
-        {
-          'C',
           function()
             require('snacks').picker.commands()
           end,
@@ -382,13 +368,6 @@ return {
         {
           'm',
           function()
-            require('snacks').picker.marks()
-          end,
-          'Marks',
-        },
-        {
-          'M',
-          function()
             require('snacks').picker.man()
           end,
           'Man Pages',
@@ -401,7 +380,7 @@ return {
           'Quickfix List',
         },
         {
-          'R',
+          'r',
           function()
             require('snacks').picker.resume()
           end,
@@ -471,14 +450,13 @@ return {
           'Goto Implementation',
         },
         {
-          'y',
+          '-',
           function()
             require('snacks').picker.lsp_type_definitions()
           end,
           'Goto T[y]pe Definition',
         },
       }
-
       key.pmaps('n', 'g', lsp_maps)
 
       key.map({ 'n', 't' }, ']]', function()

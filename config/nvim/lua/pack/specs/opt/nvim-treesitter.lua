@@ -18,7 +18,7 @@ return {
     -- on slower systems
     events = { event = 'FileType', pattern = '[^_]\\+' },
     postload = function()
-      require('nvim-treesitter').install(vim.g.ts)
+      require('nvim-treesitter').install(vim.g.ts or {})
     end,
   },
 }

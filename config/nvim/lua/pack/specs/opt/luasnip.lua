@@ -35,8 +35,16 @@ return {
 
       ls.setup({
         ft_func = function()
+          -- No activar en buffers de snacks
+          if vim.bo.filetype:match('^snacks') then
+            return {}
+          end
+
           load_snippets('all')
-          local langs = ls_ft.from_pos_or_filetype()
+          local ok, langs = pcall(ls_ft.from_pos_or_filetype)
+          if not ok then
+            langs = { vim.bo.filetype }
+          end
           for _, lang in ipairs(langs) do
             load_snippets(lang)
           end
@@ -68,7 +76,7 @@ return {
       -- https://github.com/L3MON4D3/LuaSnip/issues/258#issuecomment-1011938524
       vim.api.nvim_create_autocmd('ModeChanged', {
         desc = 'Unlink current snippet on leaving insert/selection mode.',
-        group = vim.api.nvim_create_augroup('my.luasnip.unlink', {}),
+        group = vim.api.nvim_create_augroup('luasnip.unlink', {}),
         pattern = '[si]*:[^si]*',
         -- Blink.cmp will enter normal mode shortly on accepting snippet completion,
         -- see https://github.com/Saghen/blink.cmp/issues/2035

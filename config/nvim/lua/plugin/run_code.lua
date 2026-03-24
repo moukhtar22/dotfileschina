@@ -6,54 +6,59 @@ local function load()
   require('code_runner').setup({
     mode = 'better_term',
     better_term = {
-      number = 1,
+      number = 0,
     },
     filetype = {
       v = 'v run',
       tex = function(...)
+        local tectonic = require('code_runner.hooks.tectonic')
         require('code_runner.hooks.ui').select({
           Project = function()
-            require('code_runner.commands').run_from_fn(
-              [[tectonic -X watch -x 'build$end']]
-            )
+            tectonic.build()
           end,
-          ['Project + intermediates'] = function()
-            require('code_runner.commands').run_from_fn(
-              [[tectonic -X watch -x 'build --keep-intermediates --keep-logs'$end]]
-            )
+          ['Project + logs'] = function()
+            tectonic.build('--synctex --keep-logs')
           end,
           Single = function()
-            require('code_runner.commands').run_from_fn(
-              [[tectonic -X watch -x 'compile $fileName --synctex --keep-logs --keep-intermediates -Zsearch-path=/latex']]
-            )
+            tectonic.single('--synctex --keep-logs -Zsearch-path=/latex')
           end,
         })
       end,
-      quarto = {
-        'cd $dir &&',
-        'quarto preview $fileName',
-        '--no-browser',
-        '--port 4444',
-      },
+      quarto = function(...)
+        local quarto = require('code_runner.hooks.utils').create_job_runner({
+          label = 'Quarto',
+          stop_command = 'QuartoStop',
+        })
+        local root = vim.fn.expand('%:p')
+        quarto.start(
+          ('quarto preview %s --no-browser --port 4444'):format(root)
+        )
+        vim.defer_fn(function()
+          vim.fn.jobstart(
+            { 'xdg-open', 'http://localhost:4444' },
+            { detach = true }
+          )
+        end, 10000)
+      end,
       markdown = function(...)
-        local hook = require('code_runner.hooks.preview_pdf')
+        local hr_preview_pdf = require('code_runner.hooks.preview_pdf')
         require('code_runner.hooks.ui').select({
           Latex = function()
-            hook.run({
+            hr_preview_pdf.run({
               command = 'pandoc',
               args = { '$fileName', '-o', '$tmpFile', '-t pdf' },
               preview_cmd = preview_cmd,
             })
           end,
           Beamer = function()
-            hook.run({
+            hr_preview_pdf.run({
               command = 'pandoc',
               args = { '$fileName', '-o', '$tmpFile', '-t beamer' },
               preview_cmd = preview_cmd,
             })
           end,
           Eisvogel = function()
-            hook.run({
+            hr_preview_pdf.run({
               command = 'bash',
               args = { './build.sh' },
               preview_cmd = preview_cmd,
@@ -63,7 +68,7 @@ local function load()
         })
       end,
       c = function(...)
-        c_base = {
+        local c_base = {
           'cd $dir &&',
           'gcc $fileName -o',
           '/tmp/$fileNameWithoutExt',
@@ -80,7 +85,7 @@ local function load()
         end)
       end,
       cpp = function(...)
-        cpp_base = {
+        local cpp_base = {
           [[cd '$dir' &&]],
           'g++ $fileName -o',
           '/tmp/$fileNameWithoutExt',

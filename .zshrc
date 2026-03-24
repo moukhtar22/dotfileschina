@@ -166,7 +166,7 @@ alias js="/usr/bin/node ~/.noderc"
 alias ls="exa --icons"
 alias la="exa --icons -la"
 # alias grep='grep --color=auto'
-alias cp='fcp'
+alias cp='cpx'
 cd() { pushd $1 && ls; }
 alias tree="exa --icons --tree --level=4 --long --git"
 alias zt="/bin/zathura --fork"
@@ -174,7 +174,6 @@ alias zb="zen-browser"
 alias lo="/bin/libreoffice"
 alias music="termusic"
 alias rm='rm -i'
-alias dus='du -h --max-depth=1 2>/dev/null | sort -hr'
 alias du1='du -h -d 1 2>/dev/null | sort -hr'
 alias rec="wl-screenrec --dri-device $MOZ_DRM_DEVICE -f $(date +'%s_grab.mp4')"
 alias neofetch="fastfetch -l ~/.config/fastfetch/thinkpad.txt --logo-color-1 white --logo-color-2 red --logo-color-3 '38;2;23;147;209'"
@@ -202,7 +201,7 @@ alias va='vim -c "Neorg workspace academic"'
 alias grubc="sudo -e /etc/default/grub"
 alias newmc="vim ~/.config/newm/config.py"
 alias hyprc="vim ~/.config/hypr/hyprland.conf"
-alias owlc="vim ~/.config/owl/owl.conf"
+alias scrollc="vim ~/.config/scroll/config"
 alias keydc="vim ~/Git/dotfiles/etc/keyd/default.conf"
 alias zshc="vim ~/.zshrc"
 alias zshf="vim ~/.zshfunc"
@@ -265,4 +264,4 @@ alias s="kitten ssh"
 
 source ~/.zshfunc
 # FPATH="/usr/share/zsh/site-functions:${FPATH}"
-source ~/.env
+# source ~/.env

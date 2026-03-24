@@ -1,4 +1,4 @@
----@type lsp_config_t
+---@type lsp.config
 return {
   filetypes = { 'tex' },
   cmd = { 'efm-langserver' },
@@ -13,7 +13,7 @@ return {
     languages = {
       tex = {
         {
-          formatCommand = 'tex-fmt -n -s -p',
+          formatCommand = 'tex-fmt -n -t -p -s',
           formatStdin = true,
           formatCanRange = true,
         },
